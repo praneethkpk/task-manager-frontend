@@ -1,5 +1,11 @@
 import { useState, useEffect } from "react";
-import { createTask, getTasks } from "../api/taskService";
+
+import {
+    createTask,
+    getTasks,
+    deleteTask,
+    updateTaskStatus
+} from "../api/taskService";
 
 export default function Dashboard() {
 
@@ -9,6 +15,7 @@ export default function Dashboard() {
 
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
+    const [priority, setPriority] = useState("MEDIUM");
     const [tasks, setTasks] = useState([]);
 
     const loadTasks = async () => {
@@ -18,9 +25,7 @@ export default function Dashboard() {
             const response =
                 await getTasks();
 
-            setTasks(
-                response.data
-            );
+            setTasks(response.data);
 
         } catch (error) {
 
@@ -34,20 +39,17 @@ export default function Dashboard() {
         try {
 
             const response =
-                await createTask({
+              await createTask({
+                  title,
+                  description,
+                  priority
+              });
 
-                    title,
-                    description,
-                    priority: "MEDIUM"
-
-                });
-
-            console.log(
-                response.data
-            );
+            console.log(response.data);
 
             setTitle("");
             setDescription("");
+            setPriority("MEDIUM");
 
             loadTasks();
 
@@ -58,6 +60,49 @@ export default function Dashboard() {
         }
     };
 
+    const handleStatusChange =
+        async (id, status) => {
+
+            try {
+
+                await updateTaskStatus(
+                    id,
+                    status
+                );
+
+                loadTasks();
+
+            } catch (error) {
+
+                console.log(error);
+
+            }
+        };
+
+    const handleDeleteTask =
+        async (id) => {
+
+            try {
+
+                await deleteTask(id);
+
+                loadTasks();
+
+            } catch (error) {
+
+                console.log(error);
+
+            }
+        };
+
+    const handleLogout = () => {
+
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+
+        window.location.href = "/";
+    };
+
     useEffect(() => {
 
         loadTasks();
@@ -66,18 +111,61 @@ export default function Dashboard() {
 
     return (
 
-        <div className="p-10">
+        <div className="min-h-screen bg-gray-100 p-10">
 
-            <h1 className="text-3xl font-bold mb-8">
-                Welcome {user.name}
-            </h1>
+            <div
+                className="
+                flex
+                justify-between
+                items-center
+                mb-8
+                bg-white
+                p-5
+                rounded-xl
+                shadow
+                "
+            >
 
-            <div className="space-y-4 max-w-md">
+                <h1 className="text-3xl font-bold">
+                    Welcome {user.name}
+                </h1>
+
+                <button
+                    onClick={handleLogout}
+                    className="
+                    bg-gray-800
+                    text-white
+                    px-4
+                    py-2
+                    rounded
+                    hover:bg-black
+                    "
+                >
+                    Logout
+                </button>
+
+            </div>
+
+            <div
+                className="
+                bg-white
+                p-6
+                rounded-xl
+                shadow
+                max-w-lg
+                "
+            >
 
                 <input
                     type="text"
                     placeholder="Task Title"
-                    className="border p-3 w-full rounded"
+                    className="
+                    border
+                    p-3
+                    w-full
+                    rounded
+                    mb-3
+                    "
                     value={title}
                     onChange={(e) =>
                         setTitle(e.target.value)
@@ -86,7 +174,13 @@ export default function Dashboard() {
 
                 <textarea
                     placeholder="Description"
-                    className="border p-3 w-full rounded"
+                    className="
+                    border
+                    p-3
+                    w-full
+                    rounded
+                    mb-3
+                    "
                     value={description}
                     onChange={(e) =>
                         setDescription(
@@ -94,10 +188,44 @@ export default function Dashboard() {
                         )
                     }
                 />
+                <select
+                    value={priority}
+                    onChange={(e) =>
+                        setPriority(e.target.value)
+                    }
+                    className="
+                    border
+                    p-3
+                    w-full
+                    rounded
+                    mb-3
+                    "
+                >
+
+                    <option value="LOW">
+                        LOW
+                    </option>
+
+                    <option value="MEDIUM">
+                        MEDIUM
+                    </option>
+
+                    <option value="HIGH">
+                        HIGH
+                    </option>
+
+                </select>
 
                 <button
                     onClick={handleCreateTask}
-                    className="bg-blue-600 text-white px-6 py-3 rounded hover:bg-blue-700"
+                    className="
+                    bg-blue-600
+                    text-white
+                    px-6
+                    py-3
+                    rounded
+                    hover:bg-blue-700
+                    "
                 >
                     Create Task
                 </button>
@@ -113,9 +241,7 @@ export default function Dashboard() {
                 {
                     tasks.length === 0 ? (
 
-                        <p>
-                            No tasks found.
-                        </p>
+                        <p>No tasks found.</p>
 
                     ) : (
 
@@ -123,24 +249,119 @@ export default function Dashboard() {
 
                             <div
                                 key={task.id}
-                                className="border p-4 rounded mb-3 shadow-sm"
+                                className="
+                                bg-white
+                                p-5
+                                rounded-xl
+                                shadow-md
+                                mb-4
+                                border
+                                hover:shadow-lg
+                                transition
+                                "
                             >
 
-                                <h3 className="font-bold text-lg">
+                                <h3
+                                    className="
+                                    font-bold
+                                    text-lg
+                                    "
+                                >
                                     {task.title}
                                 </h3>
 
-                                <p className="text-gray-600">
+                                <p
+                                    className="
+                                    text-gray-600
+                                    "
+                                >
                                     {task.description}
                                 </p>
 
-                                <p className="mt-2">
-                                    Status: {task.status}
-                                </p>
+                                <div
+                                    className="
+                                    flex
+                                    items-center
+                                    gap-2
+                                    mt-3
+                                    "
+                                >
 
-                                <p>
-                                    Priority: {task.priority}
-                                </p>
+                                    <span
+                                        className="
+                                        font-medium
+                                        "
+                                    >
+                                        Status:
+                                    </span>
+
+                                    <select
+                                        value={task.status}
+                                        onChange={(e) =>
+                                            handleStatusChange(
+                                                task.id,
+                                                e.target.value
+                                            )
+                                        }
+                                        className={`px-2 py-1 rounded border ${
+                                            task.status === "COMPLETED"
+                                                ? "bg-green-100 text-green-700"
+                                                : task.status === "IN_PROGRESS"
+                                                ? "bg-blue-100 text-blue-700"
+                                                : "bg-gray-100 text-gray-700"
+                                        }`}
+                                    >
+
+                                        <option value="PENDING">
+                                            PENDING
+                                        </option>
+
+                                        <option value="IN_PROGRESS">
+                                            IN_PROGRESS
+                                        </option>
+
+                                        <option value="COMPLETED">
+                                            COMPLETED
+                                        </option>
+
+                                    </select>
+
+                                </div>
+
+                                <div className="mt-3">
+
+                                    <span
+                                        className={`px-3 py-1 rounded-full text-sm font-medium ${
+                                            task.priority === "HIGH"
+                                                ? "bg-red-100 text-red-700"
+                                                : task.priority === "MEDIUM"
+                                                ? "bg-yellow-100 text-yellow-700"
+                                                : "bg-green-100 text-green-700"
+                                        }`}
+                                    >
+                                        {task.priority}
+                                    </span>
+
+                                </div>
+
+                                <button
+                                    onClick={() =>
+                                        handleDeleteTask(
+                                            task.id
+                                        )
+                                    }
+                                    className="
+                                    mt-4
+                                    bg-red-500
+                                    text-white
+                                    px-4
+                                    py-2
+                                    rounded
+                                    hover:bg-red-600
+                                    "
+                                >
+                                    Delete
+                                </button>
 
                             </div>
 
@@ -152,5 +373,6 @@ export default function Dashboard() {
             </div>
 
         </div>
+
     );
 }
