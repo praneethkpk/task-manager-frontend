@@ -2,6 +2,15 @@ import { useState } from "react";
 import { login } from "../api/authService";
 import { Link, useNavigate } from "react-router-dom";
 
+import { useEffect } from "react";
+
+useEffect(() => {
+
+    if(localStorage.getItem("token")){
+        navigate("/dashboard");
+    }
+
+}, []);
 export default function Login() {
     const navigate = useNavigate();
 
