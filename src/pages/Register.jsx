@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { register } from "../api/authService";
 import { Link, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 export default function Register() {
 
@@ -13,7 +15,6 @@ export default function Register() {
     });
 
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState("");
 
     const handleChange = (e) => {
         setFormData({
@@ -22,22 +23,32 @@ export default function Register() {
         });
     };
 
-    const handleRegister = async () => {
+    const handleRegister = async (e) => {
+
+        e.preventDefault();
+
+        if (
+            !formData.name.trim() ||
+            !formData.email.trim() ||
+            !formData.password.trim()
+        ) {
+            toast.warning("Please fill all the fields.");
+            return;
+        }
 
         setLoading(true);
-        setError("");
 
         try {
 
             await register(formData);
 
-            alert("Registration Successful! Please login.");
+            toast.success("Registration successful! Please login.");
 
             navigate("/");
 
         } catch (err) {
 
-            setError(
+            toast.error(
                 err.response?.data?.message ||
                 "Registration failed."
             );
@@ -62,13 +73,10 @@ export default function Register() {
                     Join Task Manager
                 </p>
 
-                {error && (
-                    <p className="text-red-500 text-center mb-4">
-                        {error}
-                    </p>
-                )}
-
-                <div className="space-y-4">
+                <form
+                    onSubmit={handleRegister}
+                    className="space-y-4"
+                >
 
                     <input
                         type="text"
@@ -98,14 +106,14 @@ export default function Register() {
                     />
 
                     <button
-                        onClick={handleRegister}
+                        type="submit"
                         disabled={loading}
-                        className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white p-3 rounded-lg transition"
+                        className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white p-3 rounded-lg flex justify-center items-center"
                     >
-                        {loading ? "Creating Account..." : "Register"}
+                        {loading ? <LoadingSpinner /> : "Register"}
                     </button>
 
-                </div>
+                </form>
 
                 <div className="mt-6 text-center">
 

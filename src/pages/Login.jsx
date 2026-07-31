@@ -1,40 +1,68 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { login } from "../api/authService";
 import { Link, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 export default function Login() {
+
     const navigate = useNavigate();
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState("");
 
-    const handleLogin = async () => {
+    useEffect(() => {
+
+        const token = localStorage.getItem("token");
+
+        if (token) {
+            navigate("/dashboard");
+        }
+
+    }, [navigate]);
+
+    const handleLogin = async (e) => {
+
+        e.preventDefault();
+
+        if (!email.trim() || !password.trim()) {
+            toast.warning("Please enter email and password.");
+            return;
+        }
+
         setLoading(true);
-        setError("");
 
         try {
+
             const response = await login({
                 email,
                 password,
             });
 
             localStorage.setItem("token", response.data.token);
+
             localStorage.setItem(
                 "user",
                 JSON.stringify(response.data)
             );
 
+            toast.success("Welcome back!");
+
             navigate("/dashboard");
+
         } catch (err) {
-            setError(
+
+            toast.error(
                 err.response?.data?.message ||
                 "Invalid email or password."
             );
+
         } finally {
+
             setLoading(false);
+
         }
     };
 
@@ -48,16 +76,10 @@ export default function Login() {
                 </h1>
 
                 <p className="text-center text-gray-500 mb-6">
-                    Welcome Back
+                    Welcome Back 👋
                 </p>
 
-                {error && (
-                    <p className="text-red-500 text-center mb-4">
-                        {error}
-                    </p>
-                )}
-
-                <div className="space-y-4">
+                <form onSubmit={handleLogin} className="space-y-4">
 
                     <input
                         type="email"
@@ -76,14 +98,20 @@ export default function Login() {
                     />
 
                     <button
-                        onClick={handleLogin}
+                        type="submit"
                         disabled={loading}
-                        className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white p-3 rounded-lg transition"
+                        className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white p-3 rounded-lg flex justify-center items-center"
                     >
-                        {loading ? "Logging in..." : "Login"}
+
+                        {
+                            loading
+                                ? <LoadingSpinner />
+                                : "Login"
+                        }
+
                     </button>
 
-                </div>
+                </form>
 
                 <div className="mt-6 text-center">
 

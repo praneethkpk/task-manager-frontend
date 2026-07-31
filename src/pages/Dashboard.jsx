@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-
+import Navbar from "../components/Navbar";
+import TaskCard from "../components/TaskCard";
 import {
     createTask,
     getTasks,
@@ -9,6 +10,26 @@ import {
 
 export default function Dashboard() {
 
+
+     return (
+
+            <>
+
+                <Navbar />
+
+                <div className="p-8">
+
+                    <h2 className="text-2xl font-bold mb-4">
+                        Dashboard
+                    </h2>
+
+                    {/* Existing dashboard code */}
+
+                </div>
+
+            </>
+
+        );
     const user = JSON.parse(
         localStorage.getItem("user")
     );
@@ -244,128 +265,15 @@ export default function Dashboard() {
                         <p>No tasks found.</p>
 
                     ) : (
-
-                        tasks.map(task => (
-
-                            <div
+                        tasks.map((task) => (
+                            <TaskCard
                                 key={task.id}
-                                className="
-                                bg-white
-                                p-5
-                                rounded-xl
-                                shadow-md
-                                mb-4
-                                border
-                                hover:shadow-lg
-                                transition
-                                "
-                            >
-
-                                <h3
-                                    className="
-                                    font-bold
-                                    text-lg
-                                    "
-                                >
-                                    {task.title}
-                                </h3>
-
-                                <p
-                                    className="
-                                    text-gray-600
-                                    "
-                                >
-                                    {task.description}
-                                </p>
-
-                                <div
-                                    className="
-                                    flex
-                                    items-center
-                                    gap-2
-                                    mt-3
-                                    "
-                                >
-
-                                    <span
-                                        className="
-                                        font-medium
-                                        "
-                                    >
-                                        Status:
-                                    </span>
-
-                                    <select
-                                        value={task.status}
-                                        onChange={(e) =>
-                                            handleStatusChange(
-                                                task.id,
-                                                e.target.value
-                                            )
-                                        }
-                                        className={`px-2 py-1 rounded border ${
-                                            task.status === "COMPLETED"
-                                                ? "bg-green-100 text-green-700"
-                                                : task.status === "IN_PROGRESS"
-                                                ? "bg-blue-100 text-blue-700"
-                                                : "bg-gray-100 text-gray-700"
-                                        }`}
-                                    >
-
-                                        <option value="PENDING">
-                                            PENDING
-                                        </option>
-
-                                        <option value="IN_PROGRESS">
-                                            IN_PROGRESS
-                                        </option>
-
-                                        <option value="COMPLETED">
-                                            COMPLETED
-                                        </option>
-
-                                    </select>
-
-                                </div>
-
-                                <div className="mt-3">
-
-                                    <span
-                                        className={`px-3 py-1 rounded-full text-sm font-medium ${
-                                            task.priority === "HIGH"
-                                                ? "bg-red-100 text-red-700"
-                                                : task.priority === "MEDIUM"
-                                                ? "bg-yellow-100 text-yellow-700"
-                                                : "bg-green-100 text-green-700"
-                                        }`}
-                                    >
-                                        {task.priority}
-                                    </span>
-
-                                </div>
-
-                                <button
-                                    onClick={() =>
-                                        handleDeleteTask(
-                                            task.id
-                                        )
-                                    }
-                                    className="
-                                    mt-4
-                                    bg-red-500
-                                    text-white
-                                    px-4
-                                    py-2
-                                    rounded
-                                    hover:bg-red-600
-                                    "
-                                >
-                                    Delete
-                                </button>
-
-                            </div>
-
+                                task={task}
+                                onStatusChange={handleStatusChange}
+                                onDelete={handleDeleteTask}
+                            />
                         ))
+
 
                     )
                 }
