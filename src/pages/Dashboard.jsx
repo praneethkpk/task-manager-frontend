@@ -1,74 +1,72 @@
-import { useState, useEffect } from "react";
-import Navbar from "../components/Navbar";
-import TaskCard from "../components/TaskCard";
-import TaskForm from "../components/TaskForm";
+import { useEffect, useMemo, useState } from "react";
 
 import {
     createTask,
-    getTasks,
     deleteTask,
-    updateTaskStatus
+    getTasks,
+    updateTaskStatus,
 } from "../api/taskService";
 
+import Navbar from "../components/Navbar";
+import StatsCards from "../components/StatsCards";
+import TaskForm from "../components/TaskForm";
+import SearchBar from "../components/SearchBar";
+import TaskList from "../components/TaskList";
+
+import { toast } from "react-toastify";
+
 export default function Dashboard() {
-
-
-     return (
-
-            <>
-
-                <Navbar />
-
-                <div className="p-8">
-
-                    <h2 className="text-2xl font-bold mb-4">
-                        Dashboard
-                    </h2>
-
-                    {/* Existing dashboard code */}
-
-                </div>
-
-            </>
-
-        );
-    const user = JSON.parse(
-        localStorage.getItem("user")
-    );
 
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
     const [priority, setPriority] = useState("MEDIUM");
+
     const [tasks, setTasks] = useState([]);
+    const [search, setSearch] = useState("");
 
     const loadTasks = async () => {
 
         try {
 
-            const response =
-                await getTasks();
+            const response = await getTasks();
 
             setTasks(response.data);
 
         } catch (error) {
 
-            console.log(error);
+            console.error(error);
+
+            toast.error("Failed to load tasks.");
 
         }
+
     };
+
+    useEffect(() => {
+
+        loadTasks();
+
+    }, []);
 
     const handleCreateTask = async () => {
 
+        if (!title.trim()) {
+
+            toast.warning("Task title is required.");
+
+            return;
+
+        }
+
         try {
 
-            const response =
-              await createTask({
-                  title,
-                  description,
-                  priority
-              });
+            await createTask({
+                title,
+                description,
+                priority,
+            });
 
-            console.log(response.data);
+            toast.success("Task created successfully.");
 
             setTitle("");
             setDescription("");
@@ -78,211 +76,117 @@ export default function Dashboard() {
 
         } catch (error) {
 
-            console.log(error);
+            console.error(error);
+
+            toast.error("Unable to create task.");
 
         }
+
     };
 
-    const handleStatusChange =
-        async (id, status) => {
+    const handleStatusChange = async (id, status) => {
 
-            try {
+        try {
 
-                await updateTaskStatus(
-                    id,
-                    status
-                );
+            await updateTaskStatus(id, status);
 
-                loadTasks();
+            toast.success("Task updated.");
 
-            } catch (error) {
+            loadTasks();
 
-                console.log(error);
+        } catch (error) {
 
-            }
-        };
+            console.error(error);
 
-    const handleDeleteTask =
-        async (id) => {
+            toast.error("Unable to update task.");
 
-            try {
+        }
 
-                await deleteTask(id);
-
-                loadTasks();
-
-            } catch (error) {
-
-                console.log(error);
-
-            }
-        };
-
-    const handleLogout = () => {
-
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
-
-        window.location.href = "/";
     };
 
-    useEffect(() => {
+    const handleDeleteTask = async (id) => {
 
-        loadTasks();
+        try {
 
-    }, []);
+            await deleteTask(id);
+
+            toast.success("Task deleted.");
+
+            loadTasks();
+
+        } catch (error) {
+
+            console.error(error);
+
+            toast.error("Unable to delete task.");
+
+        }
+
+    };
+
+    const filteredTasks = useMemo(() => {
+
+        return tasks.filter((task) =>
+            task.title.toLowerCase().includes(search.toLowerCase())
+        );
+
+    }, [tasks, search]);
 
     return (
 
-        <div className="min-h-screen bg-gray-100 p-10">
+        <div className="min-h-screen bg-gray-100">
 
-            <div
-                className="
-                flex
-                justify-between
-                items-center
-                mb-8
-                bg-white
-                p-5
-                rounded-xl
-                shadow
-                "
-            >
+            <Navbar />
 
-                <h1 className="text-3xl font-bold">
-                    Welcome {user.name}
+            <div className="max-w-7xl mx-auto p-8">
+
+                <h1 className="text-3xl font-bold mb-2">
+                    Dashboard
                 </h1>
 
-                <button
-                    onClick={handleLogout}
-                    className="
-                    bg-gray-800
-                    text-white
-                    px-4
-                    py-2
-                    rounded
-                    hover:bg-black
-                    "
-                >
-                    Logout
-                </button>
+                <p className="text-gray-500 mb-8">
+                    Manage your daily tasks efficiently.
+                </p>
 
-            </div>
+                <StatsCards tasks={tasks} />
 
-            <div
-                className="
-                bg-white
-                p-6
-                rounded-xl
-                shadow
-                max-w-lg
-                "
-            >
+                <div className="grid lg:grid-cols-3 gap-8 mt-8">
 
-                <input
-                    type="text"
-                    placeholder="Task Title"
-                    className="
-                    border
-                    p-3
-                    w-full
-                    rounded
-                    mb-3
-                    "
-                    value={title}
-                    onChange={(e) =>
-                        setTitle(e.target.value)
-                    }
-                />
+                    <div>
 
-                <textarea
-                    placeholder="Description"
-                    className="
-                    border
-                    p-3
-                    w-full
-                    rounded
-                    mb-3
-                    "
-                    value={description}
-                    onChange={(e) =>
-                        setDescription(
-                            e.target.value
-                        )
-                    }
-                />
-                <select
-                    value={priority}
-                    onChange={(e) =>
-                        setPriority(e.target.value)
-                    }
-                    className="
-                    border
-                    p-3
-                    w-full
-                    rounded
-                    mb-3
-                    "
-                >
+                        <TaskForm
+                            title={title}
+                            description={description}
+                            priority={priority}
+                            setTitle={setTitle}
+                            setDescription={setDescription}
+                            setPriority={setPriority}
+                            onCreateTask={handleCreateTask}
+                        />
 
-                    <option value="LOW">
-                        LOW
-                    </option>
+                    </div>
 
-                    <option value="MEDIUM">
-                        MEDIUM
-                    </option>
+                    <div className="lg:col-span-2 space-y-6">
 
-                    <option value="HIGH">
-                        HIGH
-                    </option>
+                        <SearchBar
+                            search={search}
+                            setSearch={setSearch}
+                        />
 
-                </select>
+                        <TaskList
+                            tasks={filteredTasks}
+                            onStatusChange={handleStatusChange}
+                            onDelete={handleDeleteTask}
+                        />
 
-                <button
-                    onClick={handleCreateTask}
-                    className="
-                    bg-blue-600
-                    text-white
-                    px-6
-                    py-3
-                    rounded
-                    hover:bg-blue-700
-                    "
-                >
-                    Create Task
-                </button>
+                    </div>
 
-            </div>
-
-            <div className="mt-10">
-
-                <h2 className="text-2xl font-bold mb-4">
-                    My Tasks
-                </h2>
-
-                {
-                    tasks.length === 0 ? (
-
-                        <p>No tasks found.</p>
-
-                    ) : (
-                        tasks.map((task) => (
-                            <TaskCard
-                                key={task.id}
-                                task={task}
-                                onStatusChange={handleStatusChange}
-                                onDelete={handleDeleteTask}
-                            />
-                        ))
-
-
-                    )
-                }
+                </div>
 
             </div>
 
         </div>
 
     );
+
 }
