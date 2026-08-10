@@ -83,7 +83,7 @@ export default function Register() {
                             <span>Instant Setup & Free Access</span>
                         </div>
                         <p className="text-[11px] text-emerald-200">
-                            © 2026 TaskFlow Portfolio System. All rights reserved.
+                            © 2026 TaskFlow. All rights reserved.
                         </p>
                     </div>
                 </div>

@@ -28,7 +28,7 @@ export default function Navbar() {
                             TaskFlow
                         </h1>
                         <p className="text-xs font-medium text-slate-400 hidden sm:block">
-                            Engineering Excellence Portfolio
+                            Organize your work efficiently
                         </p>
                     </div>
                 </div>

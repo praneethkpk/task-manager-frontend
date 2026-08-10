@@ -68,7 +68,7 @@ export default function Login() {
                                 Streamline your daily work with clarity.
                             </h2>
                             <p className="text-blue-100 text-sm leading-relaxed">
-                                Organize tasks, track real-time priority progress, and boost productivity with a modern engineering portfolio workflow.
+                                Organize tasks, track real-time priority progress, and boost your daily productivity.
                             </p>
                         </div>
                     </div>
@@ -79,7 +79,7 @@ export default function Login() {
                             <span>JWT Authentication Enabled</span>
                         </div>
                         <p className="text-[11px] text-blue-200">
-                            © 2026 TaskFlow Portfolio System. Built with Vite & React.
+                            © 2026 TaskFlow. All rights reserved.
                         </p>
                     </div>
                 </div>
